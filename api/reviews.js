@@ -5,14 +5,15 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const cookieStr = req.headers.cookie || "";
-  const cookies = Object.fromEntries(
-    cookieStr.split("; ").filter(c => c.includes("=")).map(c => {
-      const idx = c.indexOf("=");
-      return [c.slice(0, idx), c.slice(idx + 1)];
-    })
-  );
-  const nidAut = cookies["nid_aut"];
-  const nidSes = cookies["nid_ses"];
+  const parseCookie = (str, name) => {
+    const match = str.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  };
+
+  const spCookie = parseCookie(cookieStr, "sp_cookie");
+  const nidAut = parseCookie(cookieStr, "nid_aut");
+  const nidSes = parseCookie(cookieStr, "nid_ses");
+
   if (!nidAut || !nidSes) return res.status(401).json({ error: "로그인이 필요합니다" });
 
   const businessId = req.query.businessId || "8250200";
@@ -23,7 +24,10 @@ export default async function handler(req, res) {
     const response = await fetch(`${railwayUrl}/reviews`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-auth-token": railwayToken },
-      body: JSON.stringify({ nidAut, nidSes, businessId }),
+      body: JSON.stringify({
+        cookieStr: spCookie || `NID_AUT=${nidAut}; NID_SES=${nidSes}`,
+        businessId,
+      }),
     });
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json({ error: data.error });
