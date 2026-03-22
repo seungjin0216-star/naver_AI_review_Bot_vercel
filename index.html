@@ -308,24 +308,37 @@
   <div class="loginCard">
     <div class="loginLogo">N</div>
     <h1 class="loginTitle">리뷰 AI 답글 시스템</h1>
-    <p class="loginSub">네이버 계정으로 로그인하세요</p>
-    <input type="text" id="naverUsername" placeholder="네이버 아이디" style="
-      width:100%; padding:14px; margin-bottom:10px;
+    <p class="loginSub" style="margin-bottom:20px;">네이버 쿠키로 로그인하세요</p>
+
+    <p style="color:rgba(255,255,255,0.4);font-size:12px;text-align:left;margin-bottom:6px;">NID_AUT</p>
+    <input type="text" id="nidAut" placeholder="NID_AUT 값 붙여넣기" style="
+      width:100%; padding:12px 14px; margin-bottom:14px;
       border:1px solid rgba(255,255,255,0.15); border-radius:10px;
-      background:rgba(255,255,255,0.08); color:white; font-size:15px;
-      font-family:'Noto Sans KR',sans-serif; box-sizing:border-box;
+      background:rgba(255,255,255,0.08); color:white; font-size:13px;
+      font-family:monospace; box-sizing:border-box;
     " />
-    <input type="password" id="naverPassword" placeholder="비밀번호" style="
-      width:100%; padding:14px; margin-bottom:20px;
+
+    <p style="color:rgba(255,255,255,0.4);font-size:12px;text-align:left;margin-bottom:6px;">NID_SES</p>
+    <input type="text" id="nidSes" placeholder="NID_SES 값 붙여넣기" style="
+      width:100%; padding:12px 14px; margin-bottom:20px;
       border:1px solid rgba(255,255,255,0.15); border-radius:10px;
-      background:rgba(255,255,255,0.08); color:white; font-size:15px;
-      font-family:'Noto Sans KR',sans-serif; box-sizing:border-box;
+      background:rgba(255,255,255,0.08); color:white; font-size:13px;
+      font-family:monospace; box-sizing:border-box;
     " />
+
     <button class="btnNaver" id="loginBtn" onclick="handleLogin()">
       N &nbsp; 로그인
     </button>
     <p id="loginError" style="color:#ff6b6b;font-size:13px;margin-top:12px;display:none;"></p>
-    <p class="loginNote">아이디/비밀번호는 서버에 저장되지 않습니다</p>
+
+    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,0.05);border-radius:10px;text-align:left;">
+      <p style="color:rgba(255,255,255,0.5);font-size:12px;line-height:1.8;margin:0;">
+        📋 쿠키 찾는 방법:<br>
+        1. naver.com 접속 (로그인 상태)<br>
+        2. F12 → Application → Cookies → naver.com<br>
+        3. NID_AUT, NID_SES 값 복사
+      </p>
+    </div>
   </div>
 </div>
 
@@ -530,13 +543,13 @@ function stars(rating) {
 // 로그인
 // ─────────────────────────────────────────
 async function handleLogin() {
-  const username = document.getElementById("naverUsername").value.trim();
-  const password = document.getElementById("naverPassword").value.trim();
+  const nidAut = document.getElementById("nidAut").value.trim();
+  const nidSes = document.getElementById("nidSes").value.trim();
   const loginBtn = document.getElementById("loginBtn");
   const loginError = document.getElementById("loginError");
 
-  if (!username || !password) {
-    loginError.textContent = "아이디와 비밀번호를 입력해주세요.";
+  if (!nidAut || !nidSes) {
+    loginError.textContent = "NID_AUT와 NID_SES를 모두 입력해주세요.";
     loginError.style.display = "block";
     return;
   }
@@ -549,7 +562,7 @@ async function handleLogin() {
     const res = await fetch("/api/naver-login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ nidAut, nidSes }),
     });
     const data = await res.json();
 
